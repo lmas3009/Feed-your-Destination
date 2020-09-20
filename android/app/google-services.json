@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "878264146576",
+    "firebase_url": "https://problem-8ba85.firebaseio.com",
+    "project_id": "problem-8ba85",
+    "storage_bucket": "problem-8ba85.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:878264146576:android:076989908b1fe489c5d615",
+        "android_client_info": {
+          "package_name": "com.lmas.feed_destination"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "878264146576-9o8qh4r1tr8pagsingghgd91frt7bpjp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbfE8RAlvNTad1DemXQ_mdC5YUOBw3S9M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "878264146576-9o8qh4r1tr8pagsingghgd91frt7bpjp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -20,7 +20,7 @@ class _SettingState extends State<Setting> {
           Center(
             child: Container(
             height: 150,
-            width: 300,
+            width: 350,
             margin: const EdgeInsets.only(top: 50),
             decoration: BoxDecoration(
               border: Border.all(width: 1,color: Colors.black),
