@@ -1,4 +1,4 @@
-# Post your traviling Images
+# Post your traveling images
 
 A new Flutter project.
 
