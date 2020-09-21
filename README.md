@@ -1,4 +1,4 @@
-# feed_destination
+# Post your traveling images
 
 A new Flutter project.
 
