@@ -4,9 +4,27 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-class Login extends StatelessWidget {
-  const Login({Key key}) : super(key: key);
+class Login extends StatefulWidget {
+  Login({Key key}) : super(key: key);
+
+  @override
+  _LoginState createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Firebase.initializeApp().whenComplete(() { 
+      print("completed");
+      setState(() {});
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +94,7 @@ class _SignUpState extends State<SignUp> {
     _controller1.text = '';
     _controller2.text = '';
     _controller3.text = '';
+    
   }
 
   
@@ -176,7 +195,7 @@ class _SignUpState extends State<SignUp> {
                 ),
                 InkWell(
                   onTap: (){
-                    createUser().whenComplete(() => 
+                    createUser(_controller1.text,_controller2.text,_controller3.text).whenComplete(() => 
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>Navbar()))
                     );
                   },
@@ -267,6 +286,7 @@ class _SignInState extends State<SignIn> {
                       child: TextFormField(
                       controller: _controller4,
                         maxLines: 1,
+                        keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           icon: Icon(Icons.email_outlined),
                           hintText: "Email Id...",
@@ -292,18 +312,25 @@ class _SignInState extends State<SignIn> {
                       child: TextFormField(
                       controller: _controller5,
                         maxLines: 1,
+                        obscureText: true,
                         decoration: InputDecoration(
                           icon: Icon(Icons.security_outlined),
                           hintText: "Password...",
                           disabledBorder: InputBorder.none,
                           border: InputBorder.none,
                           hoverColor: Colors.red,
+                          
                           ),
                       ),
                     )
                   ),
                 ),
                 InkWell(
+                  onTap: (){
+                    loginuser(_controller4.text,_controller5.text).whenComplete(() => 
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=> Navbar()))
+                    );
+                  },
                       child: Container(
                       height: 55,
                       width: 200,
@@ -338,24 +365,34 @@ class _SignInState extends State<SignIn> {
   }
 }
 final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
-var email = _controller2.text.toString().replaceAll('@', "_");
- var email1 = email.replaceAll('.', "-");
 
-var _firebasedata = FirebaseDatabase().reference().child("Usernames").child(email1);
 
-Future createUser() async{
+Future createUser(username,email,password) async{
+  var email_1 = email.toString().replaceAll('@', "_");
+  var email1 = email_1.replaceAll('.', "-");
+
+  var _firebasedata = FirebaseDatabase().reference().child("Usernames").child(email1);
     try{
-      final auth.User user = (await _auth.createUserWithEmailAndPassword(email: _controller2.text, password: _controller3.text)).user;
+      final auth.User user = (await _auth.createUserWithEmailAndPassword(email: email, password: password)).user;
       _firebasedata.set(
         {
-          "Email": _controller2.text,
-          "Username": _controller1.text
+          "Email": email,
+          "Username": username
         }
       );
-      print("sdkjfhj");
     return user!=null;
     }
     catch(e){
       return e.message;
     }
 }  
+
+Future loginuser(email,password) async{
+  try{
+    final auth.User user = (await _auth.signInWithEmailAndPassword(email: email, password: password)).user;
+    return user!=null;
+  }
+  catch(e){
+    return e.message;
+  }
+}

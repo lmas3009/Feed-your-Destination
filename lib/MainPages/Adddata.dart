@@ -1,6 +1,10 @@
 import 'dart:io';
 
 import 'package:feed_destination/MainPages/Navbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -19,12 +23,30 @@ TextEditingController _controller3 = new TextEditingController();
 class _AdddataState extends State<Adddata> {
   File _image;
   final picker = ImagePicker();
+   var database = FirebaseDatabase().reference();
+  final FirebaseAuth auth1 = FirebaseAuth.instance;
+  var storage = FirebaseStorage.instance;
+  var name='';
+  bool isLoading = false;
+  
 
   @override
   void initState() { 
     super.initState();
     _controller1.text = '';
     _controller2.text = '';
+    _controller3.text = '';
+    final auth.User user =auth1.currentUser;
+      final uid = user.email;
+      var uid1 = uid.replaceAll("@", "_");
+      var uid2 = uid1.replaceAll(".", "-");
+    database.child(uid2).child('Profile').once().then((DataSnapshot data){
+                    var res =data.value;
+                    print(res['ProfileImg']);
+                      setState(() {
+                        profile=res['ProfileImg'];
+                      });
+                  });
   }
 
   Future pickImage() async {
@@ -60,6 +82,48 @@ class _AdddataState extends State<Adddata> {
     });
     }
   }
+  var profile = '';
+ 
+
+  Post(title,location,description,date,img) async{
+    final auth.User user =auth1.currentUser;
+      final uid = user.email;
+      var uid1 = uid.replaceAll("@", "_");
+      var uid2 = uid1.replaceAll(".", "-");
+      print(img);
+          StorageTaskSnapshot snapshot = await storage
+              .ref()
+              .child(uid2)
+              .child("Posts")
+              .child(title)
+              .putFile(img)
+              .onComplete;
+          if (snapshot.error == null) {
+            final String downloadUrl =
+                await snapshot.ref.getDownloadURL();
+                print(profile);
+                database.child("Posts").child(uid2).child(title).update(
+                  {
+                    "Title": title,
+                    "Location": location,
+                    "Description": description,
+                    "Date": date,
+                    "Image": downloadUrl,
+                    "ProfileImg": profile
+                  }
+                );
+            
+            setState(() {
+              isLoading = false;
+            });
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> Navbar()));
+          } else {
+            print(
+                'Error from image repo ${snapshot.error.toString()}');
+            throw ('This file is not an image');
+          }
+  }
+
   DateTime selectedDate = DateTime.now();
   _selectDate(BuildContext context) async {
   final DateTime picked = await showDatePicker(
@@ -73,6 +137,9 @@ class _AdddataState extends State<Adddata> {
       selectedDate = picked;
     });
 }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +206,29 @@ class _AdddataState extends State<Adddata> {
                   height: 60,
                   width: 300,
                   margin: const EdgeInsets.only(top: 50),
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 1,color: Colors.black),
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 10, right: 10,bottom: 3),
+                    child: TextFormField(
+                      controller: _controller3,
+                        textAlignVertical: TextAlignVertical.center,
+                        maxLines: 1,
+                        decoration: InputDecoration(
+                          hintText: "Title...",
+                          disabledBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          hoverColor: Colors.red,
+                          ),
+                      ),
+                  ),
+                ),
+                Container(
+                  height: 60,
+                  width: 300,
+                  margin: const EdgeInsets.only(top: 30),
                   decoration: BoxDecoration(
                     border: Border.all(width: 1,color: Colors.black),
                     borderRadius: BorderRadius.circular(10)
@@ -231,7 +321,7 @@ class _AdddataState extends State<Adddata> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
-          print("done");
+          Post(_controller3.text,_controller1.text,_controller2.text,selectedDate.toLocal().toString().substring(0,10),_image);
         },
         child: Icon(Icons.check,size: 30),
       ),
